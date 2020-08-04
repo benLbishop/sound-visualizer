@@ -2,7 +2,7 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Visualizer from './Visualizer';
-import { getStartingCirclePoints, getUpdatedPoints } from './canvas';
+import { getStartingCirclePoints, getUpdatedCirclePoints } from './circle';
 import { CirclePointContainer } from './types';
 
 // TODO: make these dynamic
@@ -109,7 +109,7 @@ class App extends React.PureComponent<Props, State> {
     this.analyserL.getByteFrequencyData(this.audioDataArrayL);
     this.analyserR.getByteFrequencyData(this.audioDataArrayR);
     if (this.state.running) {
-      const newPointsContainer = getUpdatedPoints(
+      const newPointsContainer = getUpdatedCirclePoints(
         this.state.pointsContainer,
         {centerX, centerY, radius},
         this.audioDataArrayL,

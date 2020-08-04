@@ -39,15 +39,13 @@ const Visualizer: React.FC<Props> = (props: Props) => {
   }
 
   return (
-    <React.Fragment>
-      <canvas
-        ref={canvasRef}
-        className='sound-circle'
-        width={window.innerWidth}
-        height={window.innerHeight}
-        onMouseDown={handleMouseDown}
-      />
-    </React.Fragment>
+    <canvas
+      ref={canvasRef}
+      className='sound-circle'
+      width={window.innerWidth}
+      height={window.innerHeight}
+      onMouseDown={handleMouseDown}
+    />
   );
 }
 
