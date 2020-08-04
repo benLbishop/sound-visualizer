@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
-import { drawCircleVisualizer } from '../lib/canvas';
-import { useWindowSize } from '../lib/sizing';
-import { ChannelData, CircleParams } from '../types';
-import constants from '../constants';
+import { drawCircleVisualizer } from '../../lib/canvas';
+import { useWindowSize } from '../../lib/sizing';
+import { ChannelData, CircleParams } from '../../types';
+import constants from '../../constants';
 
 import './Visualizer.css';
 
