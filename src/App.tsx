@@ -2,13 +2,14 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Visualizer from './Visualizer';
-import { getStartingCirclePoints, getUpdatedPoints, CirclePointContainer } from './canvas';
+import { getStartingCirclePoints, getUpdatedPoints } from './canvas';
+import { CirclePointContainer } from './types';
 
+// TODO: make these dynamic
 const centerX = window.innerWidth / 2;
 const centerY = window.innerHeight / 2;
 const radius = document.body.clientWidth <= 425 ? 120 : 160;
 const steps = document.body.clientWidth <= 425 ? 60 : 120;
-const angleExtra = 90;
 
 interface Props {}
 
@@ -39,11 +40,7 @@ class App extends React.PureComponent<Props, State> {
     this.bufferLength = 0;
     this.state = {
       running: false,
-      pointsContainer: getStartingCirclePoints(
-        {centerX, centerY, radius},
-        steps,
-        angleExtra
-      )
+      pointsContainer: getStartingCirclePoints({centerX, centerY, radius}, steps)
     }
 
     this._init();

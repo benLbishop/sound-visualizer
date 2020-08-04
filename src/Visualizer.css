@@ -8,11 +8,11 @@ canvas {
     display: block;
 }
 
-@media (prefers-reduced-motion: no-preference) {
+/* @media (prefers-reduced-motion: no-preference) {
     .sound-circle {
         animation: sound-circle-spin infinite 20s linear;
     }
-}
+} */
 
 @keyframes sound-circle-spin {
     from {

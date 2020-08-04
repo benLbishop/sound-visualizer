@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { drawCircle, getStartingCirclePoints, getUpdatedPoints, CirclePointContainer } from './canvas';
+import { drawCircle } from './canvas';
+import { CirclePointContainer } from './types';
 
 import './Visualizer.css';
 
