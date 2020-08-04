@@ -6,8 +6,8 @@ export interface CirclePoint {  // TODO: rework
 }
 
 export interface CirclePointContainer {
-    up: CirclePoint[];
-    down: CirclePoint[];
+    outerPoints: CirclePoint[];
+    innerPoints: CirclePoint[];
 }
 
 export interface CircleParams {

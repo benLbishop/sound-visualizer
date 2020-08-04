@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { drawCircle } from './canvas';
+import React, { useEffect } from 'react';
+import { drawCircleVisualizer } from './canvas';
 import { CirclePointContainer } from './types';
 
 import './Visualizer.css';
@@ -30,8 +30,8 @@ const Visualizer: React.FC<Props> = (props: Props) => {
   })
 
   const draw = (ctx: CanvasRenderingContext2D) => {
-    const { up, down } = props.pointsContainer;
-    drawCircle(ctx, up, down);
+    const { innerPoints, outerPoints } = props.pointsContainer;
+    drawCircleVisualizer(ctx, innerPoints, outerPoints);
   }
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {

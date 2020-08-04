@@ -1,64 +1,110 @@
 import { CircleParams, CirclePoint, CirclePointContainer } from './types';
 import constants from './constants';
 
-export const getStartingCirclePoints = (circleParams: CircleParams, steps: number): CirclePointContainer => {
+/**
+ * 
+ * @param circleParams parameters defining the circle we'll be drawing.
+ * @param numSteps the number of steps we want for our circle.
+ */
+export const getStartingCirclePoints = (circleParams: CircleParams, numSteps: number): CirclePointContainer => {
     const { centerX, centerY, radius } = circleParams;
+    // offset the start of the circle so the bass frequencies are at the top
     const startAngle = constants.canvas.CIRCLE_ROTATION;
     const endAngle = startAngle + (2 * Math.PI);
-    const interval = (2 * Math.PI) / steps;
+    const interval = (2 * Math.PI) / numSteps; // we'll draw numSteps points this distance apart along the circle
 
-    const up: CirclePoint[] = [];
-    const down: CirclePoint[] = [];
+    const innerPoints: CirclePoint[] = [];
+    const outerPoints: CirclePoint[] = [];
     for(let angle = startAngle; angle < endAngle; angle += interval) {
-        let distUp = constants.canvas.UP_DEFAULT_DIST;
-        let distDown = constants.canvas.DOWN_DEFAULT_DIST;
-    
-        up.push({
+        let innerDist = constants.canvas.OUTER_DEFAULT_DIST;
+        let outerDist = constants.canvas.INNER_DEFAULT_DIST;
+
+        outerPoints.push({
             angle,
-            x: centerX + radius * Math.cos(angle) * distUp,
-            y: centerY + radius * Math.sin(angle) * distUp,
-            dist: distUp
+            x: centerX + radius * Math.cos(angle) * outerDist,
+            y: centerY + radius * Math.sin(angle) * outerDist,
+            dist: outerDist
         });
         // offset the inner circle's points by a little bit
-        const downAngle = angle + constants.canvas.CIRCLE_POINT_OFFSET;
-        down.push({
+        const downAngle = angle + constants.canvas.INNER_POINT_OFFSET;
+        innerPoints.push({
             angle: downAngle,
-            x: centerX + radius * Math.cos(downAngle) * distDown,
-            y: centerY + radius * Math.sin(downAngle) * distDown,
-            dist: distDown
+            x: centerX + radius * Math.cos(downAngle) * innerDist,
+            y: centerY + radius * Math.sin(downAngle) * innerDist,
+            dist: innerDist
         });
     }
     return {
-        up,
-        down
+        innerPoints,
+        outerPoints
     }
 }
 
-// -------------
-// Canvas stuff
-// -------------
+export const getUpdatedPoints = (
+    pointsContainer: CirclePointContainer,
+    circleParams: CircleParams,
+    audioDataArrayL: Uint8Array,
+    audioDataArrayR: Uint8Array,
+    bufferLength: number
+): CirclePointContainer => {
+    const { innerPoints, outerPoints } = pointsContainer
+    const newInnerPoints = getNewPoints(
+        innerPoints,
+        audioDataArrayR,
+        bufferLength,
+        circleParams,
+        constants.canvas.INNER_DEFAULT_DIST,
+        constants.canvas.INNER_SCALING_FACTOR
+    );
+    const newOuterPoints = getNewPoints(
+        outerPoints,
+        audioDataArrayL,
+        bufferLength,
+        circleParams,
+        constants.canvas.OUTER_DEFAULT_DIST,
+        constants.canvas.OUTER_SCALING_FACTOR
+    );
+    return {
+        innerPoints: newInnerPoints,
+        outerPoints: newOuterPoints
+    }
+}
 
+/**
+ * Primarily used to draw the inner and outer circles for our display.
+ * @param ctx the context for the canvas on which we're drawing.
+ * @param points points containing the x,y coordinates for the line we want to draw.
+ */
 const drawLine = (ctx: CanvasRenderingContext2D, points: CirclePoint[]) => {
     if (points.length === 0) {
         // nothing to draw
         return;
     }
-    let origin = points[0];
-
-    ctx.beginPath();
-    ctx.moveTo(origin.x, origin.y);
+    // styling
     ctx.strokeStyle = constants.canvas.CIRCLE_COLOR;
     ctx.lineJoin = 'round';
 
+    //start the path
+    let origin = points[0];
+    ctx.beginPath();
+    ctx.moveTo(origin.x, origin.y);
+
+    // draw the line
     for (let i = 0; i < points.length; i++) {
         ctx.lineTo(points[i].x, points[i].y);
     }
 
-    // connect the last point to the first point we drew
+    // connect the last point to the origin to close the shape
     ctx.lineTo(origin.x, origin.y);
     ctx.stroke();
 }
 
+/**
+ * takes two equal-length arrays and draws lines between the points at the same indices.
+ * @param ctx the context for the canvas on which we're drawing.
+ * @param pointsA 
+ * @param pointsB 
+ */
 const connectPoints = (ctx: CanvasRenderingContext2D, pointsA: CirclePoint[], pointsB: CirclePoint[]) => {
     for (let i = 0; i < pointsA.length; i++) {
         ctx.beginPath();
@@ -69,44 +115,20 @@ const connectPoints = (ctx: CanvasRenderingContext2D, pointsA: CirclePoint[], po
     }
 }
 
-export const drawCircle = (
+/**
+ * Main function for drawing the song visualization.
+ * @param ctx the context for the canvas on which we're drawing.
+ * @param innerPoints points defining the inner circle of the display.
+ * @param outerPoints points defining the outer circle of the display.
+ */
+export const drawCircleVisualizer = (
     ctx: CanvasRenderingContext2D,
-    pointsUp: CirclePoint[],
-    pointsDown: CirclePoint[]
+    innerPoints: CirclePoint[],
+    outerPoints: CirclePoint[]
 ) => {
-    drawLine(ctx, pointsUp);
-    drawLine(ctx, pointsDown);
-    connectPoints(ctx, pointsUp, pointsDown);
-}
-
-export const getUpdatedPoints = (
-    pointsContainer: CirclePointContainer,
-    circleParams: CircleParams,
-    audioDataArrayL: Uint8Array,
-    audioDataArrayR: Uint8Array,
-    bufferLength: number
-): CirclePointContainer => {
-    const { up, down } = pointsContainer
-    const newPointsUp = getNewPoints(
-        up,
-        audioDataArrayL,
-        bufferLength,
-        circleParams,
-        constants.canvas.UP_DEFAULT_DIST,
-        constants.canvas.OUTER_SCALING_FACTOR
-    );
-    const newPointsDown = getNewPoints(
-        down,
-        audioDataArrayR,
-        bufferLength,
-        circleParams,
-        constants.canvas.DOWN_DEFAULT_DIST,
-        constants.canvas.INNER_SCALING_FACTOR
-    );
-    return {
-        up: newPointsUp,
-        down: newPointsDown
-    }
+    drawLine(ctx, innerPoints); // draw inner circle
+    drawLine(ctx, outerPoints); // draw outer circle
+    connectPoints(ctx, outerPoints, innerPoints); // draw connecting lines
 }
 
 // TODO: rename
