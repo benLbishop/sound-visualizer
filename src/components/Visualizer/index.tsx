@@ -27,7 +27,7 @@ const Visualizer: React.FC<Props> = (props: Props) => {
     const centerY = height / 2;
     const radius = Math.min(width / 2, height / 2) * 0.5;
 
-    const { STEP_THRESHOLD, SMALL_STEP, NORMAL_STEP} = constants.canvas;
+    const { STEP_THRESHOLD, SMALL_STEP, NORMAL_STEP } = constants.circle.base;
     const stepCount = radius <= STEP_THRESHOLD ? SMALL_STEP : NORMAL_STEP;
     setCircleParams({
         centerX,

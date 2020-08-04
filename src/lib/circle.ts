@@ -69,7 +69,7 @@ export const getCirclePoints = (
 ): CirclePointContainer => {
     const { left: audioLeft, right: audioRight } = audioChannelData;
     // offset the start of the circle so the bass frequencies are at the top
-    const startAngle = constants.canvas.CIRCLE_ROTATION;
+    const startAngle = constants.circle.base.CIRCLE_ROTATION;
     const endAngle = startAngle + (2 * Math.PI);
     const interval = (2 * Math.PI) / numSteps; // we'll draw numSteps points this distance apart along the circle
     const circumference = 2 * Math.PI * circleParams.radius;
@@ -78,13 +78,13 @@ export const getCirclePoints = (
     const outerPoints: Coordinate[] = [];
     for (let angle = startAngle; angle < endAngle; angle += interval) {
         // offset the inner point angle by a bit as a visual effect
-        const innerAngle = angle + constants.canvas.INNER_POINT_OFFSET;
+        const innerAngle = angle + constants.circle.inner.POINT_OFFSET;
         const innerDist = convertAudioValueToDist(
             innerAngle,
             circumference,
             audioLeft,
-            constants.canvas.INNER_DEFAULT_DIST,
-            constants.canvas.INNER_SCALING_FACTOR
+            constants.circle.inner.DEFAULT_DIST,
+            constants.circle.inner.SCALING_FACTOR
         );
         const innerPoint = createPoint(circleParams, innerAngle, innerDist);
         innerPoints.push(innerPoint);
@@ -94,8 +94,8 @@ export const getCirclePoints = (
             angle,
             circumference,
             audioRight,
-            constants.canvas.OUTER_DEFAULT_DIST,
-            constants.canvas.OUTER_SCALING_FACTOR
+            constants.circle.outer.DEFAULT_DIST,
+            constants.circle.outer.SCALING_FACTOR
         );
         const outerPoint = createPoint(circleParams, angle, outerDist);
         outerPoints.push(outerPoint);

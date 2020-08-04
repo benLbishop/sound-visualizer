@@ -1,6 +1,7 @@
 import { getCirclePoints } from './circle';
 import { Coordinate, CircleParams, ChannelData } from '../types';
-import constants from '../constants';
+
+const CIRCLE_COLOR = 'rgba(255,255,255,0.5)';
 
 /**
  * Primarily used to draw the inner and outer circles for our display.
@@ -13,7 +14,7 @@ const drawLine = (ctx: CanvasRenderingContext2D, points: Coordinate[]) => {
         return;
     }
     // styling
-    ctx.strokeStyle = constants.canvas.CIRCLE_COLOR;
+    ctx.strokeStyle = CIRCLE_COLOR;
     ctx.lineJoin = 'round';
 
     //start the path
@@ -38,7 +39,7 @@ const drawLine = (ctx: CanvasRenderingContext2D, points: Coordinate[]) => {
  * @param pointsB 
  */
 const connectPoints = (ctx: CanvasRenderingContext2D, pointsA: Coordinate[], pointsB: Coordinate[]) => {
-    ctx.strokeStyle = constants.canvas.CIRCLE_COLOR;
+    ctx.strokeStyle = CIRCLE_COLOR;
     for (let i = 0; i < pointsA.length; i++) {
         ctx.beginPath();
         ctx.moveTo(pointsA[i].x, pointsA[i].y);
