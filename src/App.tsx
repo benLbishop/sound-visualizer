@@ -1,40 +1,31 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { ChannelData } from './types';
 import Visualizer from './Visualizer';
-import { getStartingCirclePoints, getUpdatedCirclePoints } from './circle';
-import { CirclePointContainer, ChannelData } from './types';
 import AudioContainer from './AudioContainer';
-
-// TODO: make these dynamic
-const centerX = window.innerWidth / 2;
-const centerY = window.innerHeight / 2;
-const radius = document.body.clientWidth <= 425 ? 120 : 160;
-const steps = document.body.clientWidth <= 425 ? 60 : 120;
 
 interface Props {}
 
 interface State {
-  pointsContainer: CirclePointContainer;
+  channelData: ChannelData;
 }
+
 class App extends React.PureComponent<Props, State> {
 
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      pointsContainer: getStartingCirclePoints({centerX, centerY, radius}, steps),
+      channelData: {
+        left: new Uint8Array(),
+        right: new Uint8Array()
+      }
     }
   }
 
   updateVisualizer = (channelData: ChannelData) => {
-    const newPointsContainer = getUpdatedCirclePoints(
-      {centerX, centerY, radius},
-      this.state.pointsContainer,
-      channelData
-    );
     this.setState({
-      pointsContainer: newPointsContainer
+      channelData
     });
   }
 
@@ -42,7 +33,7 @@ class App extends React.PureComponent<Props, State> {
     return (
       <div className="App">
         <Visualizer
-          pointsContainer={this.state.pointsContainer}
+          channelData={this.state.channelData}
         />
         <AudioContainer
           updateChannelData={this.updateVisualizer}
@@ -53,8 +44,3 @@ class App extends React.PureComponent<Props, State> {
 }
 
 export default App;
-
-// TODO: not sure if I need this
-// document.body.addEventListener('touchend', function(ev) {
-//   context.resume();
-// });

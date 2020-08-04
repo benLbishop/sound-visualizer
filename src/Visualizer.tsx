@@ -1,11 +1,18 @@
 import React, { useEffect } from 'react';
 import { drawCircleVisualizer } from './canvas';
-import { CirclePointContainer } from './types';
+import { getCirclePoints } from './circle';
+import { CirclePointContainer, ChannelData } from './types';
 
 import './Visualizer.css';
 
+// TODO: make these dynamic
+const centerX = window.innerWidth / 2;
+const centerY = window.innerHeight / 2;
+const radius = document.body.clientWidth <= 425 ? 120 : 160;
+const steps = document.body.clientWidth <= 425 ? 60 : 120;
+
 interface Props {
-  pointsContainer: CirclePointContainer;
+  channelData: ChannelData;
 }
 
 const Visualizer: React.FC<Props> = (props: Props) => {
@@ -25,11 +32,17 @@ const Visualizer: React.FC<Props> = (props: Props) => {
       return;
     }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    draw(ctx);
+
+    const pointsContainer = getCirclePoints(
+      {centerX, centerY, radius},
+      props.channelData,
+      steps
+    );
+    draw(ctx, pointsContainer);
   })
 
-  const draw = (ctx: CanvasRenderingContext2D) => {
-    const { innerPoints, outerPoints } = props.pointsContainer;
+  const draw = (ctx: CanvasRenderingContext2D, pointsContainer: CirclePointContainer) => {
+    const { innerPoints, outerPoints } = pointsContainer;
     drawCircleVisualizer(ctx, innerPoints, outerPoints);
   }
 

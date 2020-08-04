@@ -17,6 +17,9 @@ const convertAudioValueToDist = (
     baseDist: number,
     scalingFactor: number
 ): number => {
+    if (audioDataArray.length === 0) {
+        return baseDist;
+    }
     // TODO: how the heck does this make any sense. I don't know why the circumference is needed
     const rawIdx = angle * (180.0 / Math.PI) * (audioDataArray.length / (2 * circumference))
     const audioIdx = Math.max(Math.ceil(rawIdx), 0);
@@ -51,79 +54,51 @@ const createPoint = (
 }
 
 /**
- * 
- * @param circleParams parameters defining the circle we'll be drawing.
- * @param numSteps the number of steps we want for our circle.
+ * Creates the updated points for the display. Should be called when the audio data has changed. 
+ * @param circleParams the defining dimensions of the circle.
+ * @param audioChannelData contains the left and right audio channel data.
+ * @param numSteps the number of steps to be drawn on the circle.
  */
-export const getStartingCirclePoints = (circleParams: CircleParams, numSteps: number): CirclePointContainer => {
+export const getCirclePoints = (
+    circleParams: CircleParams,
+    audioChannelData: ChannelData,
+    numSteps: number
+): CirclePointContainer => {
+    const { left: audioLeft, right: audioRight } = audioChannelData;
     // offset the start of the circle so the bass frequencies are at the top
     const startAngle = constants.canvas.CIRCLE_ROTATION;
     const endAngle = startAngle + (2 * Math.PI);
     const interval = (2 * Math.PI) / numSteps; // we'll draw numSteps points this distance apart along the circle
-
-    const innerDist = constants.canvas.OUTER_DEFAULT_DIST;
-    const outerDist = constants.canvas.INNER_DEFAULT_DIST;
+    const circumference = 2 * Math.PI * circleParams.radius;
 
     const innerPoints: CirclePoint[] = [];
     const outerPoints: CirclePoint[] = [];
     for (let angle = startAngle; angle < endAngle; angle += interval) {
         // offset the inner point angle by a bit as a visual effect
         const innerAngle = angle + constants.canvas.INNER_POINT_OFFSET;
+        const innerDist = convertAudioValueToDist(
+            innerAngle,
+            circumference,
+            audioLeft,
+            constants.canvas.INNER_DEFAULT_DIST,
+            constants.canvas.INNER_SCALING_FACTOR
+        );
         const innerPoint = createPoint(circleParams, innerAngle, innerDist);
         innerPoints.push(innerPoint);
 
         // outer point just uses the actual angle
+        const outerDist = convertAudioValueToDist(
+            angle,
+            circumference,
+            audioRight,
+            constants.canvas.OUTER_DEFAULT_DIST,
+            constants.canvas.OUTER_SCALING_FACTOR
+        );
         const outerPoint = createPoint(circleParams, angle, outerDist);
         outerPoints.push(outerPoint);
     }
     return {
         innerPoints,
         outerPoints
-    }
-}
-
-/**
- * Creates the updated points for the display. Should be called when the audio data has changed. 
- * @param circleParams the defining dimensions of the circle.
- * @param pointsContainer the old points in the display.
- * @param audioChannelData contains the left and right audio channel data.
- * @param bufferLength the length of the audio data arrays.
- */
-export const getUpdatedCirclePoints = (
-    circleParams: CircleParams,
-    pointsContainer: CirclePointContainer,
-    audioChannelData: ChannelData
-): CirclePointContainer => {
-    const { innerPoints, outerPoints } = pointsContainer;
-    const { left: audioLeft, right: audioRight } = audioChannelData;
-    const circumference = 2 * Math.PI * circleParams.radius;
-
-    // for each point, convert the audio value corresponding to the point to
-    // a distance from the center of the circle, and create the resulting new point
-    const newInnerPoints = innerPoints.map(point => {
-        const newDist = convertAudioValueToDist(
-            point.angle,
-            circumference,
-            audioLeft,
-            constants.canvas.INNER_DEFAULT_DIST,
-            constants.canvas.INNER_SCALING_FACTOR
-        );
-        return createPoint(circleParams, point.angle, newDist);
-    })
-
-    const newOuterPoints = outerPoints.map(point => {
-        const newDist = convertAudioValueToDist(
-            point.angle,
-            circumference,
-            audioRight,
-            constants.canvas.OUTER_DEFAULT_DIST,
-            constants.canvas.OUTER_SCALING_FACTOR
-        );
-        return createPoint(circleParams, point.angle, newDist);
-    })
-
-    return {
-        innerPoints: newInnerPoints,
-        outerPoints: newOuterPoints
-    }
+    };
 }
