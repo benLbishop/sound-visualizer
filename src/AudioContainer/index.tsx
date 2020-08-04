@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { ChannelData } from './types';
-import constants from './constants';
+import { ChannelData } from '../types';
+import constants from '../constants';
 
 import './AudioContainer.css';
 

@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { ChannelData } from './types';
-import Visualizer from './Visualizer';
-import AudioContainer from './AudioContainer';
-import constants from './constants';
+import { ChannelData } from '../types';
+import Visualizer from '../Visualizer';
+import AudioContainer from '../AudioContainer';
+import constants from '../constants';
 
 import './App.css';
 

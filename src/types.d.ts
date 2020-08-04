@@ -1,13 +1,11 @@
-export interface CirclePoint {  // TODO: rework
+export interface Coordinate {
     x: number;
     y: number;
-    angle: number;
-    dist: number;
 }
 
 export interface CirclePointContainer {
-    outerPoints: CirclePoint[];
-    innerPoints: CirclePoint[];
+    outerPoints: Coordinate[];
+    innerPoints: Coordinate[];
 }
 
 export interface CircleParams {

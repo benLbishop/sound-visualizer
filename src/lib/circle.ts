@@ -1,5 +1,10 @@
-import { CircleParams, CirclePoint, CirclePointContainer, ChannelData } from './types';
-import constants from './constants';
+import {
+    CircleParams,
+    Coordinate,
+    CirclePointContainer,
+    ChannelData
+} from '../types';
+import constants from '../constants';
 
 /**
  * Converts an 8-bit audio value into a position on the circle display.
@@ -41,13 +46,11 @@ const createPoint = (
     circleParams: CircleParams,
     angle: number,
     dist: number
-): CirclePoint => {
+): Coordinate => {
     const { centerX, centerY, radius } = circleParams;
     const x = centerX + radius * Math.cos(angle) * dist;
     const y = centerY + radius * Math.sin(angle) * dist
     return {
-        angle,
-        dist,
         x,
         y 
     };
@@ -71,8 +74,8 @@ export const getCirclePoints = (
     const interval = (2 * Math.PI) / numSteps; // we'll draw numSteps points this distance apart along the circle
     const circumference = 2 * Math.PI * circleParams.radius;
 
-    const innerPoints: CirclePoint[] = [];
-    const outerPoints: CirclePoint[] = [];
+    const innerPoints: Coordinate[] = [];
+    const outerPoints: Coordinate[] = [];
     for (let angle = startAngle; angle < endAngle; angle += interval) {
         // offset the inner point angle by a bit as a visual effect
         const innerAngle = angle + constants.canvas.INNER_POINT_OFFSET;

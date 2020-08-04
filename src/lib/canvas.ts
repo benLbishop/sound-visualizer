@@ -1,13 +1,13 @@
 import { getCirclePoints } from './circle';
-import { CirclePoint, CircleParams, ChannelData } from './types';
-import constants from './constants';
+import { Coordinate, CircleParams, ChannelData } from '../types';
+import constants from '../constants';
 
 /**
  * Primarily used to draw the inner and outer circles for our display.
  * @param ctx the context for the canvas on which we're drawing.
  * @param points points containing the x,y coordinates for the line we want to draw.
  */
-const drawLine = (ctx: CanvasRenderingContext2D, points: CirclePoint[]) => {
+const drawLine = (ctx: CanvasRenderingContext2D, points: Coordinate[]) => {
     if (points.length === 0) {
         // nothing to draw
         return;
@@ -37,7 +37,7 @@ const drawLine = (ctx: CanvasRenderingContext2D, points: CirclePoint[]) => {
  * @param pointsA 
  * @param pointsB 
  */
-const connectPoints = (ctx: CanvasRenderingContext2D, pointsA: CirclePoint[], pointsB: CirclePoint[]) => {
+const connectPoints = (ctx: CanvasRenderingContext2D, pointsA: Coordinate[], pointsB: Coordinate[]) => {
     ctx.strokeStyle = constants.canvas.CIRCLE_COLOR;
     for (let i = 0; i < pointsA.length; i++) {
         ctx.beginPath();
