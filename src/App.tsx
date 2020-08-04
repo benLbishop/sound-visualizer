@@ -1,8 +1,11 @@
 import React from 'react';
-import './App.css';
+
 import { ChannelData } from './types';
 import Visualizer from './Visualizer';
 import AudioContainer from './AudioContainer';
+import constants from './constants';
+
+import './App.css';
 
 interface Props {}
 
@@ -23,7 +26,7 @@ class App extends React.PureComponent<Props, State> {
     }
   }
 
-  updateVisualizer = (channelData: ChannelData) => {
+  updateChannelData = (channelData: ChannelData) => {
     this.setState({
       channelData
     });
@@ -36,7 +39,8 @@ class App extends React.PureComponent<Props, State> {
           channelData={this.state.channelData}
         />
         <AudioContainer
-          updateChannelData={this.updateVisualizer}
+          refreshInterval={constants.audio.REFRESH_INTERVAL}
+          updateChannelData={this.updateChannelData}
         />
       </div>
     );
