@@ -1,4 +1,4 @@
-import { CircleParams, CirclePoint, CirclePointContainer } from './types';
+import { CircleParams, CirclePoint, CirclePointContainer, ChannelData } from './types';
 import constants from './constants';
 
 /**
@@ -14,12 +14,11 @@ const convertAudioValueToDist = (
     angle: number,
     circumference: number,
     audioDataArray: Uint8Array,
-    bufferLength: number,
     baseDist: number,
     scalingFactor: number
 ): number => {
     // TODO: how the heck does this make any sense. I don't know why the circumference is needed
-    const rawIdx = angle * (180.0 / Math.PI) * (bufferLength / (2 * circumference))
+    const rawIdx = angle * (180.0 / Math.PI) * (audioDataArray.length / (2 * circumference))
     const audioIdx = Math.max(Math.ceil(rawIdx), 0);
 
     // normalize the audio data (8 bit, so converting from [0, 255] to [0, 1])
@@ -85,20 +84,18 @@ export const getStartingCirclePoints = (circleParams: CircleParams, numSteps: nu
 
 /**
  * Creates the updated points for the display. Should be called when the audio data has changed. 
- * @param pointsContainer the old points in the display.
  * @param circleParams the defining dimensions of the circle.
- * @param audioDataArrayL the left channel of the audio.
- * @param audioDataArrayR the right channel of the audio.
+ * @param pointsContainer the old points in the display.
+ * @param audioChannelData contains the left and right audio channel data.
  * @param bufferLength the length of the audio data arrays.
  */
 export const getUpdatedCirclePoints = (
-    pointsContainer: CirclePointContainer,
     circleParams: CircleParams,
-    audioDataArrayL: Uint8Array,
-    audioDataArrayR: Uint8Array,
-    bufferLength: number
+    pointsContainer: CirclePointContainer,
+    audioChannelData: ChannelData
 ): CirclePointContainer => {
     const { innerPoints, outerPoints } = pointsContainer;
+    const { left: audioLeft, right: audioRight } = audioChannelData;
     const circumference = 2 * Math.PI * circleParams.radius;
 
     // for each point, convert the audio value corresponding to the point to
@@ -107,8 +104,7 @@ export const getUpdatedCirclePoints = (
         const newDist = convertAudioValueToDist(
             point.angle,
             circumference,
-            audioDataArrayL,
-            bufferLength,
+            audioLeft,
             constants.canvas.INNER_DEFAULT_DIST,
             constants.canvas.INNER_SCALING_FACTOR
         );
@@ -119,8 +115,7 @@ export const getUpdatedCirclePoints = (
         const newDist = convertAudioValueToDist(
             point.angle,
             circumference,
-            audioDataArrayR,
-            bufferLength,
+            audioRight,
             constants.canvas.OUTER_DEFAULT_DIST,
             constants.canvas.OUTER_SCALING_FACTOR
         );

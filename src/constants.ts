@@ -7,6 +7,9 @@ const constants = {
         OUTER_SCALING_FACTOR: 1.4,
         INNER_SCALING_FACTOR: 0.5,
         CIRCLE_COLOR: 'rgba(255,255,255,0.5)'
+    },
+    audio: {
+        TEST_SONG: "https://s3.eu-west-2.amazonaws.com/nelsoncodepen/Audiobinger_-_The_Garden_State.mp3" // TODO: remove
     }
 }
 

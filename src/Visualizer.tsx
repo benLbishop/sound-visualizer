@@ -6,7 +6,6 @@ import './Visualizer.css';
 
 interface Props {
   pointsContainer: CirclePointContainer;
-  toggleAudio(): void;
 }
 
 const Visualizer: React.FC<Props> = (props: Props) => {
@@ -34,17 +33,12 @@ const Visualizer: React.FC<Props> = (props: Props) => {
     drawCircleVisualizer(ctx, innerPoints, outerPoints);
   }
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
-    props.toggleAudio();
-  }
-
   return (
     <canvas
       ref={canvasRef}
       className='sound-circle'
       width={window.innerWidth}
       height={window.innerHeight}
-      onMouseDown={handleMouseDown}
     />
   );
 }

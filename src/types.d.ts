@@ -15,3 +15,8 @@ export interface CircleParams {
     centerY: number;
     radius: number;
 }
+
+export interface ChannelData {
+    left: Uint8Array;
+    right: Uint8Array;
+}
