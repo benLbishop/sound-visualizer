@@ -1,15 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+
 import { drawCircleVisualizer } from './canvas';
-import { getCirclePoints } from './circle';
-import { CirclePointContainer, ChannelData } from './types';
+import { useWindowSize } from './sizing';
+import { ChannelData, CircleParams } from './types';
+import constants from './constants';
 
 import './Visualizer.css';
-
-// TODO: make these dynamic
-const centerX = window.innerWidth / 2;
-const centerY = window.innerHeight / 2;
-const radius = document.body.clientWidth <= 425 ? 120 : 160;
-const steps = document.body.clientWidth <= 425 ? 60 : 120;
 
 interface Props {
   channelData: ChannelData;
@@ -17,41 +13,53 @@ interface Props {
 
 const Visualizer: React.FC<Props> = (props: Props) => {
   const canvasRef: React.MutableRefObject<HTMLCanvasElement | null> = React.useRef(null);
+  const [width, height] = useWindowSize();
+  const [circleParams, setCircleParams] = useState<CircleParams>({
+    centerX: 0,
+    centerY: 0,
+    radius: 0,
+  });
+  const [numSteps, setNumSteps] = useState(0);
 
+  // called whenever the width and height fields change. Used for resizing the circle
+  useEffect(() => {
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = Math.min(width / 2, height / 2) * 0.5;
+
+    const { STEP_THRESHOLD, SMALL_STEP, NORMAL_STEP} = constants.canvas;
+    const stepCount = radius <= STEP_THRESHOLD ? SMALL_STEP : NORMAL_STEP;
+    setCircleParams({
+        centerX,
+        centerY,
+        radius
+    })
+    setNumSteps(stepCount)
+  }, [width, height])
+
+  // called whenever anything changes. used for drawing
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) {
-      // TODO
       console.log('no canvas');
       return;
     }
     const ctx = canvas.getContext('2d');
     if (!ctx) {
-      // TODO
       console.log('no ctx');
       return;
     }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const pointsContainer = getCirclePoints(
-      {centerX, centerY, radius},
-      props.channelData,
-      steps
-    );
-    draw(ctx, pointsContainer);
+    drawCircleVisualizer(ctx, circleParams, props.channelData, numSteps);
   })
-
-  const draw = (ctx: CanvasRenderingContext2D, pointsContainer: CirclePointContainer) => {
-    const { innerPoints, outerPoints } = pointsContainer;
-    drawCircleVisualizer(ctx, innerPoints, outerPoints);
-  }
 
   return (
     <canvas
       ref={canvasRef}
       className='sound-circle'
-      width={window.innerWidth}
-      height={window.innerHeight}
+      width={width}
+      height={height}
     />
   );
 }

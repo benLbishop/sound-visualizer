@@ -1,4 +1,5 @@
-import { CirclePoint } from './types';
+import { getCirclePoints } from './circle';
+import { CirclePoint, CircleParams, ChannelData } from './types';
 import constants from './constants';
 
 /**
@@ -54,9 +55,15 @@ const connectPoints = (ctx: CanvasRenderingContext2D, pointsA: CirclePoint[], po
  */
 export const drawCircleVisualizer = (
     ctx: CanvasRenderingContext2D,
-    innerPoints: CirclePoint[],
-    outerPoints: CirclePoint[]
+    circleParams: CircleParams,
+    channelData: ChannelData,
+    numSteps: number
 ) => {
+    const { innerPoints, outerPoints } = getCirclePoints(
+        circleParams,
+        channelData,
+        numSteps
+    );
     drawLine(ctx, innerPoints); // draw inner circle
     drawLine(ctx, outerPoints); // draw outer circle
     connectPoints(ctx, outerPoints, innerPoints); // draw connecting lines
