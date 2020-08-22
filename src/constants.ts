@@ -18,8 +18,7 @@ const constants = {
     },
     audio: {
         FFT_SIZE: 8192,
-        REFRESH_INTERVAL: 50, // controls how often the audio data will be polled
-        TEST_SONG: "https://s3.eu-west-2.amazonaws.com/nelsoncodepen/Audiobinger_-_The_Garden_State.mp3" // TODO: remove
+        REFRESH_INTERVAL: 50 // controls how often the audio data will be polled
     }
 }
 

@@ -53,7 +53,7 @@ const useAudioAnalyzer = (audio: HTMLAudioElement) => {
 type AudioReturn = [
     boolean,
     () => void,
-    (src: string) => void
+    (file: File) => void
 ]
 
 export const useAudio = (refreshInterval: number, updateChannelData: (data: ChannelData) => void): AudioReturn => {
@@ -63,13 +63,6 @@ export const useAudio = (refreshInterval: number, updateChannelData: (data: Chan
     const [refresher, setRefresher] = useState<NodeJS.Timeout | undefined>();
 
     useEffect(() => {
-        // setAudio({
-        //     ...audio,
-        //     loop: false,
-        //     autoplay: false,
-        //     crossOrigin: 'anonymous'
-        // })
-
         setUpEventListeners();
         return () => {
             tearDownEventListeners();
@@ -97,12 +90,10 @@ export const useAudio = (refreshInterval: number, updateChannelData: (data: Chan
     }, [playing]);
 
     const setUpEventListeners = () => {
-        audio.addEventListener('canplay', handleCanPlay);
         audio.addEventListener('ended', () => setPlaying(false));
     }
     
     const tearDownEventListeners = () => {
-        audio.removeEventListener('canplay', handleCanPlay);
         audio.removeEventListener('ended', () => setPlaying(false));
     }
 
@@ -110,14 +101,18 @@ export const useAudio = (refreshInterval: number, updateChannelData: (data: Chan
         setPlaying(!playing);
     }
 
-    const loadSrc = (src: string) => {
-        audio.src = src; // TODO: jank to be modifying audio like this
-        audio.load();
-    }
-
-    const handleCanPlay = () => {
-        // TODO: idk if I even need this
-        
+    const load = (file: File) => {
+        const reader = new FileReader();
+        reader.onload = (readerEvent: ProgressEvent<FileReader>) => {
+            if (!readerEvent.target || typeof(readerEvent.target.result) !== 'string') {
+                console.log('UNRECOGNIZED READEREVENT: ', readerEvent.target);
+                return;
+            }
+            const audioSrc = readerEvent.target.result;
+            audio.src = audioSrc; // TODO: jank to be modifying audio like this
+            audio.load();
+        }
+        reader.readAsDataURL(file);
     }
 
     const updateChannels = () => {
@@ -128,5 +123,5 @@ export const useAudio = (refreshInterval: number, updateChannelData: (data: Chan
         }
     }
 
-    return [playing, toggle, loadSrc];
+    return [playing, toggle, load];
 }
