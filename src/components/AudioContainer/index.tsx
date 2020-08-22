@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FormEvent } from 'react';
 
 import { ChannelData } from '../../types';
 import constants from '../../constants';
@@ -37,8 +37,8 @@ class AudioContainer extends React.PureComponent<Props, State> {
     // TODO: this can probably be done in a cleaner way.
     // this is what causes the audio data to update.
     setInterval(() => {
-      this.updateAudioData()
-    }, this.props.refreshInterval)
+      this.updateAudioData();
+    }, this.props.refreshInterval);
   }
 
   initializeAnalysers = () => {
@@ -56,15 +56,30 @@ class AudioContainer extends React.PureComponent<Props, State> {
     this.audioDataArrayR = new Uint8Array(bufferLength);
   }
 
-  loadAudio = (audioSrc: string) => {
-    this.audio.src = audioSrc;
+  loadAudio = (event: React.FormEvent<HTMLInputElement>) => {
+    console.log('LOADING AUDIO');
+    const files = event.currentTarget.files;
+    if (!files || files.length === 0) {
+      console.log('NO AUDIO FILE TO LOAD');
+      return;
+    }
     this.audio.loop = false;
     this.audio.autoplay = false;
     this.audio.crossOrigin = "anonymous";
 
     // call `handleCanPlay` when it music can be played
     this.audio.addEventListener('canplay', this.handleCanPlay);
-    this.audio.load();
+    
+    const reader = new FileReader();
+    reader.onload = (readerEvent: ProgressEvent<FileReader>) => {
+      if (!readerEvent.target || typeof(readerEvent.target.result) !== 'string') {
+        console.log('UNRECOGNIZED READEREVENT: ', readerEvent.target);
+        return;
+      }
+      this.audio.src = readerEvent.target.result;
+      this.audio.load();
+    }
+    reader.readAsDataURL(files[0]);
 
     this.setState({
       running: true
@@ -88,12 +103,7 @@ class AudioContainer extends React.PureComponent<Props, State> {
     this.splitter.connect(this.context.destination);
   }
 
-  toggleAudio = () => {
-    if (this.state.running === false) {
-      // haven't started anything. Load the song
-      // TODO: have an input for choosing the song
-      this.loadAudio(constants.audio.TEST_SONG);
-    }
+  toggleAudio = async () => {
     if (this.audio.paused) {
       this.audio.play();
     } else {
@@ -117,7 +127,10 @@ class AudioContainer extends React.PureComponent<Props, State> {
 
   render() {
     return (
-      <button className='play-button' onMouseDown={this.toggleAudio}>{this.audio.paused ? 'Start' : 'Stop'}</button>
+      <div style={{display: 'flex', flexDirection: 'column'}} className='audio-container'>
+        <input type='file' accept='audio/*' onChange={this.loadAudio}></input>
+        <button style={{flex: 1}} onMouseDown={this.toggleAudio}>{this.audio.paused ? 'Start' : 'Stop'}</button>
+      </div>
     )
   }
 }
