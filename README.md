@@ -1,5 +1,28 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Requirements
+
+### Install NodeJS
+
+* https://nodejs.org/en/
+
+### Install Yarn
+
+* https://classic.yarnpkg.com/en/docs/install#windows-stable
+
+### Install Git
+
+* NOTE: If you're running macOS/Linux, you don't need to do this. It should already be installed in your terminal
+* https://git-scm.com/download/win
+
+When all of these are installed, you should fork this repo by clicking the "Fork" button in the upper right, go to your repositories and click on the forked repo, and then follow the instructions for cloning the repository.
+
+Once the repository is cloned, you should be able to run the command `yarn start` in the folder where you cloned the project and have the webpage appear in your broswer at http://localhost:3000
+
+### Visual Studio Code
+* This isn't required, but if you're going to want to change any of the code down the road, you'll want some kind of IDE to edit the files. I'd recommend VSCode as a good fit for this:
+* https://code.visualstudio.com/download
+
 ## Available Scripts
 
 In the project directory, you can run:
