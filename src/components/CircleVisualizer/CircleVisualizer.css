@@ -1,11 +1,6 @@
-body {
+#circle-visualizer {
     background-image: radial-gradient(circle, #F0C505, #F76E2A 10%, #A71A5B 40%, #651366);
-    position: relative;
     overflow: hidden;
-}
-  
-canvas {
-    display: block;
 }
 
 /* @media (prefers-reduced-motion: no-preference) {
@@ -14,11 +9,11 @@ canvas {
     }
 } */
 
-@keyframes sound-circle-spin {
+/* @keyframes sound-circle-spin {
     from {
          transform: rotate(0deg);
     }
     to {
          transform: rotate(360deg);
     }
-}
+} */

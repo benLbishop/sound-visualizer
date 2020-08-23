@@ -1,11 +1,10 @@
 import React from 'react';
 
 import { ChannelData } from '../../types';
-import Visualizer from '../Visualizer';
 import AudioContainer from '../AudioContainer';
 import constants from '../../constants';
 
-import './App.css';
+import CircleVisualizer from '../CircleVisualizer';
 
 interface Props {}
 
@@ -14,7 +13,6 @@ interface State {
 }
 
 class App extends React.PureComponent<Props, State> {
-
   constructor(props: Props) {
     super(props);
 
@@ -34,8 +32,8 @@ class App extends React.PureComponent<Props, State> {
 
   render() {
     return (
-      <div className="App">
-        <Visualizer
+      <div style={{display: 'flex', width: '100%', height: '100%'}}>
+        <CircleVisualizer
           channelData={this.state.channelData}
         />
         <AudioContainer
