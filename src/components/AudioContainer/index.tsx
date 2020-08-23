@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { ChannelData } from '../../types';
-import { useAudio, useAudioAnalyzer } from '../../lib/audio';
+import { useAudio, useTwoChannelAnalyser } from '../../lib/audio';
 
 import './AudioContainer.css';
 
@@ -12,7 +12,7 @@ interface Props {
 
 const AudioContainer: React.FC<Props> = (props) => {
   const [audio, playing, toggleAudio, loadFromFile] = useAudio();
-  const [getCurrentAudioData] = useAudioAnalyzer(audio);
+  const [getCurrentAudioData] = useTwoChannelAnalyser(audio);
   const [audioSrc, setAudioSrc] = useState<File | undefined>();
   const [dataRefresher, setDataRefresher] = useState<NodeJS.Timeout | undefined>();
 

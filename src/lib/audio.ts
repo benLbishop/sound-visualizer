@@ -2,49 +2,66 @@ import { useState, useEffect } from 'react';
 
 import constants from '../constants';
 
-export const useAudioAnalyzer = (audio: HTMLAudioElement) => {
+/**
+ * State hook for an AnalyserNode.
+ * @param context the AudioContext the node will be attached to.
+ */
+const useAudioAnalyser = (context: AudioContext): [AnalyserNode, () => Uint8Array] => {
+    const [analyser] = useState(context.createAnalyser());
+    const [dataBuffer, setDataBuffer] = useState(new Uint8Array());
+
+    /** Effect hook for initialization stuff */
+    useEffect(() => {
+        analyser.fftSize = constants.audio.FFT_SIZE;
+
+        const bufferLength = analyser.frequencyBinCount; // this is just fftSize / 2
+        setDataBuffer(new Uint8Array(bufferLength));
+    }, [])
+
+    const getCurrentData = (): Uint8Array => {
+        // this checks what is currently playing and places the frequency spectrum into the data buffer.
+        analyser.getByteFrequencyData(dataBuffer);
+        return dataBuffer;
+    }
+
+    return [analyser, getCurrentData];
+}
+
+/**
+ * State Hook for analysing split channels of data.
+ * @param audio the HTMLAudioElement which will be analysed.
+ */
+export const useTwoChannelAnalyser = (audio: HTMLAudioElement) => {
     const [context] = useState(new AudioContext());
-    const [splitter] = useState(context.createChannelSplitter());
-    const [leftAnalyser] = useState(context.createAnalyser());
-    const [rightAnalyser] = useState(context.createAnalyser());
-    const [leftData, setLeftData] = useState(new Uint8Array());
-    const [rightData, setRightData] = useState(new Uint8Array());
+    const [leftAnalyser, getLeftData] = useAudioAnalyser(context);
+    const [rightAnalyser, getRightData] = useAudioAnalyser(context);
     
     /** Effect hook for initialization stuff */
     useEffect(() => {
-        // connect the channel splitter to the audio that's playing
+        // create the splitter and connect it to the audio element
+        const splitter = context.createChannelSplitter();
         const source = context.createMediaElementSource(audio);
         source.connect(splitter);
         splitter.connect(context.destination);
 
-        leftAnalyser.fftSize = constants.audio.FFT_SIZE;
-        rightAnalyser.fftSize = constants.audio.FFT_SIZE;
-        
-        // pretty sure that the second param for this specifies which channel to connect the analyser to
-        splitter.connect(leftAnalyser, 0, 0);
-        splitter.connect(rightAnalyser, 1, 0);
-    
-        // set up the data arrays that will be used to read the frequencies
-        const bufferLength = leftAnalyser.frequencyBinCount;
-        setLeftData(new Uint8Array(bufferLength));
-        setRightData(new Uint8Array(bufferLength));
+        // connect the analysers to the appropriate channels
+        splitter.connect(leftAnalyser, constants.audio.outputChannels.LEFT);
+        splitter.connect(rightAnalyser, constants.audio.outputChannels.RIGHT);
     }, []);
 
     const getCurrentAudioData = () => {
-        // this checks what is currently playing and places the frequency spectrum
-        // into the arrays leftData and rightData.
-        leftAnalyser.getByteFrequencyData(leftData);
-        rightAnalyser.getByteFrequencyData(rightData);
+        const left = getLeftData();
+        const right = getRightData();
         return {
-            left: leftData,
-            right: rightData
+            left,
+            right
         };
     }
 
-    return [getCurrentAudioData]
+    return [getCurrentAudioData];
 }
 
-type AudioReturn = [
+type AudioHookReturn = [
     HTMLAudioElement,
     boolean,
     () => void,
@@ -55,7 +72,7 @@ type AudioReturn = [
  * State hook for playing audio.
  * @param src (optional) the string representing the audio source.
  */
-export const useAudio = (src?: string): AudioReturn => {
+export const useAudio = (src?: string): AudioHookReturn => {
     const [audio] = useState(new Audio(src));
     const [playing, setPlaying] = useState(false);
 

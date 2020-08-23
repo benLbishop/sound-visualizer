@@ -18,7 +18,11 @@ const constants = {
     },
     audio: {
         FFT_SIZE: 8192,
-        REFRESH_INTERVAL: 50 // controls how often the audio data will be polled
+        REFRESH_INTERVAL: 50, // controls how often the audio data will be polled
+        outputChannels: {
+            LEFT: 0,
+            RIGHT: 1
+        }
     }
 }
 
