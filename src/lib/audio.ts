@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { ChannelData } from '../types';
+
 import constants from '../constants';
 
-
-const useAudioAnalyzer = (audio: HTMLAudioElement) => {
+export const useAudioAnalyzer = (audio: HTMLAudioElement) => {
     const [context] = useState(new AudioContext());
     const [splitter] = useState(context.createChannelSplitter());
     const [leftAnalyser] = useState(context.createAnalyser());
@@ -11,18 +10,13 @@ const useAudioAnalyzer = (audio: HTMLAudioElement) => {
     const [leftData, setLeftData] = useState(new Uint8Array());
     const [rightData, setRightData] = useState(new Uint8Array());
     
+    /** Effect hook for initialization stuff */
     useEffect(() => {
-        // connect the audio element to the analyser node and the analyser node
-        // to the main Web Audio context
-        // connect the channel splitter to the audio that's playing to divide it into two tracks
+        // connect the channel splitter to the audio that's playing
         const source = context.createMediaElementSource(audio);
         source.connect(splitter);
         splitter.connect(context.destination);
-        initializeAnalysers();
-    }, []);
 
-    const initializeAnalysers = () => {
-        // setup that I don't fully understand, but is necessary
         leftAnalyser.fftSize = constants.audio.FFT_SIZE;
         rightAnalyser.fftSize = constants.audio.FFT_SIZE;
         
@@ -34,7 +28,7 @@ const useAudioAnalyzer = (audio: HTMLAudioElement) => {
         const bufferLength = leftAnalyser.frequencyBinCount;
         setLeftData(new Uint8Array(bufferLength));
         setRightData(new Uint8Array(bufferLength));
-    }
+    }, []);
 
     const getCurrentAudioData = () => {
         // this checks what is currently playing and places the frequency spectrum
@@ -51,17 +45,21 @@ const useAudioAnalyzer = (audio: HTMLAudioElement) => {
 }
 
 type AudioReturn = [
+    HTMLAudioElement,
     boolean,
     () => void,
     (file: File) => void
 ]
 
-export const useAudio = (refreshInterval: number, updateChannelData: (data: ChannelData) => void): AudioReturn => {
-    const [audio] = useState(new Audio());
+/**
+ * State hook for playing audio.
+ * @param src (optional) the string representing the audio source.
+ */
+export const useAudio = (src?: string): AudioReturn => {
+    const [audio] = useState(new Audio(src));
     const [playing, setPlaying] = useState(false);
-    const [getCurrentAudioData] = useAudioAnalyzer(audio);
-    const [refresher, setRefresher] = useState<NodeJS.Timeout | undefined>();
 
+    /** Effect hook for initialization stuff */
     useEffect(() => {
         setUpEventListeners();
         return () => {
@@ -69,24 +67,9 @@ export const useAudio = (refreshInterval: number, updateChannelData: (data: Chan
         }
     }, []);
 
+    /** Effect hook for toggling the playing/pausing of the audio */
     useEffect(() => {
-        // TODO: this can probably be done in a cleaner way.
-        // this is what causes the audio data to update.
-
-        if (playing) {
-            audio.play();
-            const interval = setInterval(() => {
-                updateChannels();
-            }, refreshInterval);
-            setRefresher(interval);
-        } else {
-            audio.pause();
-            if (refresher) {
-                clearInterval(refresher);
-                setRefresher(undefined);
-            }
-        }
-        playing ? audio.play() : audio.pause(); // TODO: weird
+        playing ? audio.play() : audio.pause();
     }, [playing]);
 
     const setUpEventListeners = () => {
@@ -101,7 +84,7 @@ export const useAudio = (refreshInterval: number, updateChannelData: (data: Chan
         setPlaying(!playing);
     }
 
-    const load = (file: File) => {
+    const loadFromFile = (file: File) => {
         const reader = new FileReader();
         reader.onload = (readerEvent: ProgressEvent<FileReader>) => {
             if (!readerEvent.target || typeof(readerEvent.target.result) !== 'string') {
@@ -109,19 +92,11 @@ export const useAudio = (refreshInterval: number, updateChannelData: (data: Chan
                 return;
             }
             const audioSrc = readerEvent.target.result;
-            audio.src = audioSrc; // TODO: jank to be modifying audio like this
+            audio.src = audioSrc;
             audio.load();
         }
         reader.readAsDataURL(file);
     }
 
-    const updateChannels = () => {
-        if (playing) {
-            const newData = getCurrentAudioData();
-            // this sends the updated audio data back to the parent component.
-            updateChannelData(newData);
-        }
-    }
-
-    return [playing, toggle, load];
+    return [audio, playing, toggle, loadFromFile];
 }
